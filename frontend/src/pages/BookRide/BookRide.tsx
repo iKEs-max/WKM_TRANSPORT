@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Bus, MapPin, User, ChevronRight, CheckCircle, Loader2, Calendar, Phone, CreditCard, Clock } from 'lucide-react';
+import { Bus, MapPin, User, ChevronRight, CheckCircle, Loader2, Calendar, Phone, Clock } from 'lucide-react';
 import { routeService } from '@/services/route.service';
 import { bookingService } from '@/services/booking.service';
-import { settingsService } from '@/services/settings.service';
 import type { Route } from '@/types/route.types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/common/Button/Button';
@@ -33,17 +32,14 @@ export const BookRide: React.FC = () => {
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [routesData, settingsData] = await Promise.all([
+        const [routesData] = await Promise.all([
           routeService.getRoutes(),
-          settingsService.getPublicSettings()
         ]);
         setRoutes(routesData);
-        setSettings(settingsData);
       } catch (err) {
         console.error('Failed to load booking data:', err);
       } finally {
