@@ -36,7 +36,7 @@ export const DashboardLayout: React.FC = () => {
       
       <div className="flex flex-col flex-1 overflow-hidden relative z-10">
         <header className="lg:hidden flex items-center justify-between px-6 py-4 bg-white/5 backdrop-blur-xl border-b border-white/10">
-          <Logo size={24} className="brightness-0 invert" />
+          <Logo size={24} variant="light" />
           <span className="font-display font-bold text-white tracking-widest uppercase text-xs">Admin Console</span>
           <button 
             className="p-2 text-white hover:bg-white/10 rounded-xl transition-colors" 

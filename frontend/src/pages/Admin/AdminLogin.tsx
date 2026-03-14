@@ -59,7 +59,7 @@ export const AdminLogin: React.FC = () => {
            <div className="absolute bottom-0 left-0 w-64 h-64 bg-onukpa-blue/20 rounded-full blur-[100px] -ml-32 -mb-32"></div>
 
            <div className="relative z-10">
-              <Logo size={40} className="mb-12 brightness-0 invert" />
+              <Logo size={40} variant="light" className="mb-12" />
               <div className="space-y-6">
                 <motion.h1 
                   initial={{ opacity: 0, x: -20 }}
