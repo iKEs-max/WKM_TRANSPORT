@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useSettingsStore } from '@/store/settings.store';
 import { Loader } from '@/components/common/Loader/Loader';
 import { ToastContainer } from '@/components/common/Toast/Toast';
+import { ScrollToTop } from '@/components/common/ScrollToTop/ScrollToTop';
 
 // ── Lazy-loaded Public Pages ──
 const Home        = React.lazy(() => import('@/pages/Home/Home').then((m) => ({ default: m.Home })));
@@ -106,6 +107,7 @@ export const AppRouter: React.FC = () => {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Suspense fallback={<Loader fullScreen />}>
         <AnimatedRoutes />
       </Suspense>
