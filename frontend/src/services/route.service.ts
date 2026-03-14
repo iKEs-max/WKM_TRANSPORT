@@ -139,14 +139,19 @@ export const routeService = {
   getDashboardStats: async () => {
     // This previously called a complex backend aggregator.
     // For now, let's provide basic counts from Supabase.
-    // In a real app, you might want a Supabase edge function for this.
     const { count: totalRoutes } = await supabase.from('routes').select('*', { count: 'exact', head: true });
     const { count: activeRoutes } = await supabase.from('routes').select('*', { count: 'exact', head: true }).eq('status', 'ACTIVE');
     
     return {
       totalRoutes: totalRoutes || 0,
       activeRoutes: activeRoutes || 0,
-      // ... other stats would need separate queries or RPC
+      totalBookings: 0,
+      totalRevenue: 0,
+      confirmedBookings: 0,
+      pendingBookings: 0,
+      chartData: [],
+      recentBookings: [],
+      routesFill: [],
     };
   },
 };
