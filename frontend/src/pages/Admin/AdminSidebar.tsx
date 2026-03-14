@@ -50,10 +50,6 @@ export const AdminSidebar: React.FC = () => {
           <div className="p-8 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Logo size={28} variant="light" />
-              <div>
-                <span className="block font-display font-bold text-white text-lg tracking-tight">Onukpa</span>
-                <span className="block text-[10px] font-bold text-onukpa-orange uppercase tracking-widest">Admin v4.0</span>
-              </div>
             </div>
             <button 
               onClick={() => setSidebarOpen(false)}

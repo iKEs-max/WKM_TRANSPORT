@@ -1,14 +1,22 @@
-import React from 'react';
+import { useSettingsStore } from '@/store/settings.store';
 
 interface LogoProps {
   size?: number;
   className?: string;
   variant?: 'light' | 'dark' | 'auto';
+  hideText?: boolean;
 }
 
-export const Logo: React.FC<LogoProps> = ({ size = 24, className = "", variant = 'auto' }) => {
+export const Logo: React.FC<LogoProps> = ({ size = 24, className = "", variant = 'auto', hideText = false }) => {
   const isDark = variant === 'dark';
   const isLight = variant === 'light';
+  const { settings } = useSettingsStore();
+
+  const siteName = settings?.siteName || 'Onukpa Express Ride';
+  // Split name for styling: first word normally, rest with accent
+  const words = siteName.split(' ');
+  const firstWord = words[0];
+  const remainingText = words.slice(1).join(' ');
   
   return (
     <div className={`flex items-center gap-3 group ${className}`}>
@@ -18,15 +26,17 @@ export const Logo: React.FC<LogoProps> = ({ size = 24, className = "", variant =
       >
         <img 
           src="/images/logo.png" 
-          alt="Onukpa Express Ride" 
+          alt={siteName} 
           className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
         />
       </div>
-      <span className={`font-display font-bold tracking-tight transition-colors ${
-        isLight ? 'text-white' : isDark ? 'text-onukpa-blue' : 'text-onukpa-blue dark:text-white'
-      }`} style={{ fontSize: size }}>
-        Onukpa<span className="text-onukpa-orange">Express</span> <span className={`${isLight ? 'text-white/60' : 'text-onukpa-blue/60'} group-hover:text-onukpa-orange transition-colors`}>Ride</span>
-      </span>
+      {!hideText && (
+        <span className={`font-display font-bold tracking-tight transition-colors ${
+          isLight ? 'text-white' : isDark ? 'text-onukpa-blue' : 'text-onukpa-blue dark:text-white'
+        }`} style={{ fontSize: size }}>
+          {firstWord}<span className="text-onukpa-orange">{remainingText}</span>
+        </span>
+      )}
     </div>
   );
 };
