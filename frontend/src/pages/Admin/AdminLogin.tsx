@@ -27,7 +27,9 @@ export const AdminLogin: React.FC = () => {
       setAuth(user, tokens);
       navigate(ROUTES.ADMIN_DASHBOARD);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
+      console.error('[Admin Login Error]', err);
+      const message = err.response?.data?.message || err.message || 'Invalid credentials. Please try again.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }

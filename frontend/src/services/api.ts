@@ -26,11 +26,21 @@ api.interceptors.response.use(
     
     // Handle 401 Unauthorized globally
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't redirect if we are already on a login page or trying to login
+      const isLoginRequest = originalRequest.url?.includes('/auth/login');
+      const isLoginPage = window.location.pathname.includes('/login');
+      
+      if (isLoginRequest || isLoginPage) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
       
-      // Optionally handle refresh tokens here instead of directly logging out
+      // Clear auth and redirect based on context
       useAuthStore.getState().logout();
-      window.location.href = '/login';
+      
+      const isAdminPath = window.location.pathname.startsWith('/admin');
+      window.location.href = isAdminPath ? '/admin/login' : '/login';
     }
     return Promise.reject(error);
   }
