@@ -32,6 +32,7 @@ export const BookRide: React.FC = () => {
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(true);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -63,8 +64,9 @@ export const BookRide: React.FC = () => {
     if (step === 1) {
       setStep(2);
     } else if (step === 2) {
+      setFormError(null);
       if (!/^\+?[0-9]{10,15}$/.test(form.phone.replace(/\s/g, ''))) {
-        alert('Please enter a valid phone number (at least 10 digits).');
+        setFormError('Please enter a valid phone number (at least 10 digits).');
         return;
       }
       // Create booking and send SMS as soon as passenger info is provided
@@ -79,17 +81,14 @@ export const BookRide: React.FC = () => {
           date: form.date,
           time: form.time
         });
-        setBookingId(booking.id);
-        setStep(3);
+        setBookingId(booking.ticketNumber || booking.id);
+        setConfirmed(true);
       } catch (err) {
         console.error('Booking failed:', err);
-        alert('Failed to process booking. Please check your network and try again.');
+        setFormError('Failed to process booking. Please check your network and try again.');
       } finally {
         setLoading(false);
       }
-    } else if (step === 3) {
-      // Final confirmation
-      setConfirmed(true);
     }
   };
 
@@ -115,7 +114,7 @@ export const BookRide: React.FC = () => {
                <CheckCircle size={56} />
             </div>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Request Received!</h2>
-            <p className="text-slate-500 text-lg mb-10">We've sent a detailed confirmation SMS to {form.phone}. Our concave team will verify your payment shortly.</p>
+            <p className="text-slate-500 text-lg mb-10">We've sent a detailed confirmation SMS to {form.phone}. Our concierge team will verify your payment shortly.</p>
             
             <div className="bg-slate-50/50 rounded-3xl p-8 mb-10 text-left space-y-4 border border-slate-100">
                <div className="flex justify-between items-center pb-4 border-b border-slate-200/50">
@@ -295,7 +294,7 @@ export const BookRide: React.FC = () => {
                           variant="primary" 
                           size="lg" 
                           fullWidth 
-                          disabled={!form.route || !form.date || !form.time}
+                          disabled={!form.route || !form.date || (departureTimes.length > 0 && !form.time)}
                           rightIcon={<ChevronRight size={20} />}
                         >
                           Continue to passenger info
@@ -341,11 +340,14 @@ export const BookRide: React.FC = () => {
                               className="w-full bg-slate-50 border-2 border-slate-100 py-4 pl-14 pr-6 rounded-2xl focus:outline-none focus:border-onukpa-orange focus:ring-4 focus:ring-onukpa-orange/5 transition-all font-bold text-onukpa-blue-dark" 
                               placeholder="e.g. 055 123 4567" 
                               value={form.phone} 
-                              onChange={e => setForm({...form, phone: e.target.value})} 
+                              onChange={e => { setFormError(null); setForm({...form, phone: e.target.value}); }} 
                               required
-                            />
-                          </div>
-                          <p className="text-xs text-slate-400 italic">We'll send your ticket and tracking link via SMS immediately.</p>
+                             />
+                           </div>
+                           <p className="text-xs text-slate-400 italic">We'll send your ticket and tracking link via SMS immediately.</p>
+                           {formError && (
+                             <p className="text-sm font-bold text-rose-500 mt-2 flex items-center gap-1.5">⚠️ {formError}</p>
+                           )}
                         </div>
                       </div>
 

@@ -39,8 +39,8 @@ api.interceptors.response.use(
       // Clear auth and redirect based on context
       useAuthStore.getState().logout();
       
-      const isAdminPath = window.location.pathname.startsWith('/admin');
-      window.location.href = isAdminPath ? '/admin/login' : '/login';
+      // Always redirect to admin/login — there is no public /login route
+      window.location.href = '/admin/login';
     }
     return Promise.reject(error);
   }

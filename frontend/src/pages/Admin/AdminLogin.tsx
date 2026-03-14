@@ -119,6 +119,7 @@ export const AdminLogin: React.FC = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
+                      autoComplete="current-password"
                       className="w-full bg-white/5 border-2 border-white/10 py-4.5 pl-14 pr-14 rounded-2xl focus:outline-none focus:border-onukpa-orange focus:ring-4 focus:ring-onukpa-orange/5 transition-all text-white font-medium"
                       required
                     />
