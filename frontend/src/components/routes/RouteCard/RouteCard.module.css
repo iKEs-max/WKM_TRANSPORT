@@ -1,0 +1,127 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: var(--transition-normal);
+  background: var(--bg-card);
+  position: relative;
+}
+
+.popularBadge {
+  position: absolute;
+  top: 12px;
+  right: -30px;
+  background: var(--primary);
+  color: white;
+  padding: 4px 35px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  transform: rotate(45deg);
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  letter-spacing: 0.05em;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--spacing-lg) var(--spacing-lg) 0;
+}
+
+.locations {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.locationPoint {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.city {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.iconAccent { color: var(--warning); }
+.iconPrimary { color: var(--primary); }
+.iconMuted { color: var(--text-muted); }
+.iconError { color: var(--error); }
+
+.body {
+  padding: 0 var(--spacing-lg);
+}
+
+.operationalInfo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px dashed var(--border);
+  margin-bottom: var(--spacing-md);
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.infoLabel {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.infoValue {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.timesSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.timeGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
+  border-top: 1px solid var(--border);
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.seats {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.875rem;
+}
+
+.textNormal { color: var(--text-secondary); }
+.textError { color: var(--error); font-weight: 500; }

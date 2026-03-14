@@ -1,0 +1,74 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.mainContent {
+  flex: 1;
+}
+
+.dashboardPage {
+  display: flex;
+  min-height: 100vh;
+  background-color: #0c0c0e;
+}
+
+.dashboardContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: 100vh;
+  position: relative;
+}
+
+.mobileHeader {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: #0f0f14;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 900;
+}
+
+.mobileTitle {
+  font-weight: 700;
+  color: white;
+  font-size: 1rem;
+}
+
+.menuBtn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.menuBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dashboardMain {
+  flex: 1;
+  padding: 2.5rem;
+}
+
+@media (max-width: 1024px) {
+  .dashboardMain {
+    padding: 1.5rem;
+  }
+
+  .mobileHeader {
+    display: flex;
+  }
+}
