@@ -12,7 +12,6 @@ import { RouteGrid } from '@/components/routes/RouteGrid/RouteGrid';
 import { ROUTES } from '@/config/routes';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/common/Button/Button';
-import { Logo } from '@/components/common/Logo/Logo';
 
 // Final deployment synchronization trigger: 2026-03-14T01:54Z
 export const Home: React.FC = () => {
