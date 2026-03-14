@@ -1,4 +1,4 @@
-import api from './api';
+import { supabase } from '@/config/supabaseClient';
 import type { Route, CreateRoutePayload, UpdateRoutePayload } from '@/types/route.types';
 
 const parseRoutes = (raw: any[]): Route[] => {
@@ -8,66 +8,145 @@ const parseRoutes = (raw: any[]): Route[] => {
     .filter(r => r !== null && typeof r === 'object')
     .map((r) => ({
       ...r,
-      // Normalize field names from backend (backend uses base_price, frontend uses price)
+      id: String(r.id),
+      // Normalize field names from Supabase (postgres often uses snake_case)
       price: Number(r.price ?? r.base_price ?? 0),
       departure: r.departure ?? r.origin ?? 'Unknown',
+      destination: r.destination ?? 'Unknown',
       totalSeats: Number(r.totalSeats ?? r.total_seats ?? 0),
       availableSeats: Number(r.availableSeats ?? r.available_seats ?? 0),
-      departureTimes: r.departureTimes ?? r.departure_times ?? [],
+      departureTimes: Array.isArray(r.departureTimes) ? r.departureTimes : (Array.isArray(r.departure_times) ? r.departure_times : []),
+      status: r.status ?? 'ACTIVE',
+      isPopular: r.isPopular ?? r.is_popular ?? false,
+      estimatedDuration: r.estimatedDuration ?? r.estimated_duration ?? '',
+      operatingDays: r.operatingDays ?? r.operating_days ?? '',
     }));
 };
 
 export const routeService = {
   getRoutes: async (): Promise<Route[]> => {
-    const { data } = await api.get('/routes');
-    // Handle both { data: [...] } and { data: { data: [...] } }
-    const routes = (data as any).data ?? data ?? [];
-    return parseRoutes(Array.isArray(routes) ? routes : []);
+    const { data, error } = await supabase
+      .from('routes')
+      .select('*')
+      .order('departure', { ascending: true });
+
+    if (error) throw error;
+    return parseRoutes(data || []);
   },
 
   getRouteById: async (id: string): Promise<Route> => {
-    const { data } = await api.get(`/routes/${id}`);
-    const r = data.data;
-    return parseRoutes([r])[0];
+    const { data, error } = await supabase
+      .from('routes')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return parseRoutes([data])[0];
   },
 
   createRoute: async (payload: CreateRoutePayload): Promise<Route> => {
-    const { data } = await api.post('/routes', payload);
-    const r = data.data;
-    return parseRoutes([r])[0];
+    const dbPayload = {
+      departure: payload.departure ?? payload.origin,
+      destination: payload.destination,
+      price: payload.price ?? payload.base_price,
+      departure_times: payload.departure_times,
+      total_seats: payload.totalSeats ?? payload.total_seats,
+      available_seats: payload.totalSeats ?? payload.total_seats,
+      status: payload.status ?? 'ACTIVE',
+      is_popular: payload.isPopular,
+      estimated_duration: payload.estimatedDuration,
+      operating_days: payload.operatingDays,
+    };
+
+    const { data, error } = await supabase
+      .from('routes')
+      .insert([dbPayload])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return parseRoutes([data])[0];
   },
 
   updateRoute: async (id: string, payload: UpdateRoutePayload): Promise<Route> => {
-    const { data } = await api.patch(`/routes/${id}`, payload);
-    const r = data.data;
-    return parseRoutes([r])[0];
+    const dbPayload: any = {};
+    if (payload.departure !== undefined || payload.origin !== undefined) dbPayload.departure = payload.departure ?? payload.origin;
+    if (payload.destination !== undefined) dbPayload.destination = payload.destination;
+    if (payload.price !== undefined || payload.base_price !== undefined) dbPayload.price = payload.price ?? payload.base_price;
+    if (payload.departure_times !== undefined) dbPayload.departure_times = payload.departure_times;
+    if (payload.totalSeats !== undefined || payload.total_seats !== undefined) dbPayload.total_seats = payload.totalSeats ?? payload.total_seats;
+    if (payload.availableSeats !== undefined || payload.available_seats !== undefined) dbPayload.available_seats = payload.availableSeats ?? payload.available_seats;
+    if (payload.status !== undefined) dbPayload.status = payload.status;
+    if (payload.isPopular !== undefined) dbPayload.is_popular = payload.isPopular;
+    if (payload.estimatedDuration !== undefined) dbPayload.estimated_duration = payload.estimatedDuration;
+    if (payload.operatingDays !== undefined) dbPayload.operating_days = payload.operatingDays;
+
+    const { data, error } = await supabase
+      .from('routes')
+      .update(dbPayload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return parseRoutes([data])[0];
   },
 
-  // Toggle ACTIVE / INACTIVE
   updateRouteStatus: async (id: string, status: 'ACTIVE' | 'INACTIVE'): Promise<void> => {
-    await api.patch(`/routes/${id}/status`, { status });
+    const { error } = await supabase
+      .from('routes')
+      .update({ status })
+      .eq('id', id);
+
+    if (error) throw error;
   },
 
-  // Update available_seats and/or total_seats
   updateRouteSeats: async (
     id: string,
     totalSeats: number,
     availableSeats: number
   ): Promise<{ availabilityLabel: string }> => {
-    const { data } = await api.patch(`/routes/${id}/seats`, {
-      totalSeats,
-      availableSeats,
-    });
-    return { availabilityLabel: data.availabilityLabel };
+    const { error } = await supabase
+      .from('routes')
+      .update({ 
+        total_seats: totalSeats, 
+        available_seats: availableSeats 
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    // Derive label locally as we bypassed the backend logic
+    const pct = totalSeats > 0 ? (availableSeats / totalSeats) * 100 : 0;
+    let availabilityLabel = 'Available';
+    if (availableSeats === 0) availabilityLabel = 'Full';
+    else if (availableSeats === 1) availabilityLabel = '1 Seat Left';
+    else if (pct <= 20) availabilityLabel = 'Filling Fast';
+
+    return { availabilityLabel };
   },
 
   deleteRoute: async (id: string): Promise<void> => {
-    await api.delete(`/routes/${id}`);
+    const { error } = await supabase
+      .from('routes')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
   },
 
-  // Admin dashboard stats
   getDashboardStats: async () => {
-    const { data } = await api.get('/routes/admin/stats');
-    return data.stats;
+    // This previously called a complex backend aggregator.
+    // For now, let's provide basic counts from Supabase.
+    // In a real app, you might want a Supabase edge function for this.
+    const { count: totalRoutes } = await supabase.from('routes').select('*', { count: 'exact', head: true });
+    const { count: activeRoutes } = await supabase.from('routes').select('*', { count: 'exact', head: true }).eq('status', 'ACTIVE');
+    
+    return {
+      totalRoutes: totalRoutes || 0,
+      activeRoutes: activeRoutes || 0,
+      // ... other stats would need separate queries or RPC
+    };
   },
 };
