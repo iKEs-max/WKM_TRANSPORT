@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bus, MapPin, User, ChevronRight, CheckCircle, Loader2, Calendar, Phone, CreditCard, Clock } from 'lucide-react';
 import { routeService } from '@/services/route.service';
+import { bookingService } from '@/services/booking.service';
 import { settingsService } from '@/services/settings.service';
 import type { Route } from '@/types/route.types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,6 +30,7 @@ export const BookRide: React.FC = () => {
     payment: 'momo' 
   });
   const [confirmed, setConfirmed] = useState(false);
+  const [bookingId, setBookingId] = useState<string | null>(null);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<any>(null);
@@ -60,15 +62,37 @@ export const BookRide: React.FC = () => {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split('T')[0];
 
-  const handleNext = (e: React.FormEvent) => {
+  const handleNext = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (step < 3) setStep(step + 1);
-    else {
-      const msg = encodeURIComponent(
-        `🚌 *ONUKPA EXPRESS RIDE BOOKING*\n\nRoute: ${selectedRoute?.departure} → ${selectedRoute?.destination}\nDate: ${form.date} at ${form.time}\nSeats: ${form.seats}\nName: ${form.name}\nPhone: ${form.phone}\nPayment: ${form.payment.toUpperCase()}\nTotal: GH₵ ${total}\n\nPlease confirm my booking!`
-      );
-      const waNumber = settings?.whatsappNumber?.replace(/\+/g, '') || '233XXXXXXXXX';
-      window.open(`https://wa.me/${waNumber}?text=${msg}`, '_blank');
+    if (step === 1) {
+      setStep(2);
+    } else if (step === 2) {
+      if (!/^\+?[0-9]{10,15}$/.test(form.phone.replace(/\s/g, ''))) {
+        alert('Please enter a valid phone number (at least 10 digits).');
+        return;
+      }
+      // Create booking and send SMS as soon as passenger info is provided
+      setLoading(true);
+      try {
+        const booking = await bookingService.createConciergeBooking({
+          routeId: form.route,
+          numberOfTickets: parseInt(form.seats),
+          name: form.name,
+          phone: form.phone,
+          paymentMethod: form.payment,
+          date: form.date,
+          time: form.time
+        });
+        setBookingId(booking.id);
+        setStep(3);
+      } catch (err) {
+        console.error('Booking failed:', err);
+        alert('Failed to process booking. Please check your network and try again.');
+      } finally {
+        setLoading(false);
+      }
+    } else if (step === 3) {
+      // Final confirmation
       setConfirmed(true);
     }
   };
@@ -95,9 +119,13 @@ export const BookRide: React.FC = () => {
                <CheckCircle size={56} />
             </div>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Request Received!</h2>
-            <p className="text-slate-500 text-lg mb-10">We've opened WhatsApp with your details. Our concierge team will confirm your seat once payment is verified.</p>
+            <p className="text-slate-500 text-lg mb-10">We've sent a detailed confirmation SMS to {form.phone}. Our concave team will verify your payment shortly.</p>
             
             <div className="bg-slate-50/50 rounded-3xl p-8 mb-10 text-left space-y-4 border border-slate-100">
+               <div className="flex justify-between items-center pb-4 border-b border-slate-200/50">
+                  <span className="text-slate-400 font-bold text-xs uppercase tracking-widest">Ticket ID</span>
+                  <span className="font-bold text-onukpa-orange tracking-widest">{bookingId || '---'}</span>
+               </div>
               <div className="flex justify-between items-center pb-4 border-b border-slate-200/50">
                  <span className="text-slate-400 font-bold text-xs uppercase tracking-widest">Route</span>
                  <span className="font-bold text-onukpa-blue-dark">{selectedRoute?.departure} → {selectedRoute?.destination}</span>
@@ -112,7 +140,7 @@ export const BookRide: React.FC = () => {
               </div>
             </div>
 
-            <Button variant="secondary" size="lg" fullWidth onClick={() => { setConfirmed(false); setStep(1); setForm({ route:'',date:'',time:'',seats:'1',name:'',phone:'',payment:'momo' }); }}>
+            <Button variant="secondary" size="lg" fullWidth onClick={() => { setConfirmed(false); setStep(1); setForm({ route:'',date:'',time:'',seats:'1',name:'',phone:'',payment:'momo' }); setBookingId(null); }}>
               New Booking 
             </Button>
           </motion.div>
@@ -150,7 +178,7 @@ export const BookRide: React.FC = () => {
             <div className="lg:col-span-2 space-y-10">
               {/* Premium Step Indicator */}
               <div className="flex items-center justify-between max-w-xl mx-auto mb-4">
-                {['Trip', 'Details', 'Payment'].map((label, i) => (
+                {['Trip', 'Passenger'].map((label, i) => (
                   <div key={label} className="flex flex-col items-center relative flex-1 last:flex-none">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500 border-2 ${
                       step > i + 1 ? "bg-green-500 border-green-500 text-white" :
@@ -164,7 +192,7 @@ export const BookRide: React.FC = () => {
                     }`}>
                       {label}
                     </span>
-                    {i < 2 && (
+                    {i < 1 && (
                        <div className={`absolute top-5 left-[calc(50%+20px)] w-[calc(100%-40px)] h-0.5 transition-colors duration-500 ${
                          step > i + 1 ? "bg-green-500" : "bg-slate-200"
                        }`} />
@@ -189,8 +217,9 @@ export const BookRide: React.FC = () => {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Route</label>
+                          <label htmlFor="route" className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Route</label>
                           <select 
+                            id="route"
                             className="w-full bg-slate-50 border-2 border-slate-100 py-4 px-6 rounded-2xl focus:outline-none focus:border-onukpa-orange focus:ring-4 focus:ring-onukpa-orange/5 transition-all font-bold text-onukpa-blue-dark appearance-none"
                             value={form.route} 
                             onChange={e => setForm({...form, route: e.target.value, time: ''})} 
@@ -206,10 +235,11 @@ export const BookRide: React.FC = () => {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Travel Date</label>
+                          <label htmlFor="date" className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Travel Date</label>
                           <div className="relative">
                              <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                              <input 
+                              id="date"
                               type="date" 
                               className="w-full bg-slate-50 border-2 border-slate-100 py-4 pl-14 pr-6 rounded-2xl focus:outline-none focus:border-onukpa-orange focus:ring-4 focus:ring-onukpa-orange/5 transition-all font-bold text-onukpa-blue-dark" 
                               min={minDate} 
@@ -280,22 +310,23 @@ export const BookRide: React.FC = () => {
 
                   {step === 2 && (
                     <motion.div 
-                      key="step1"
+                      key="step2"
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-8"
                     >
                       <h3 className="text-2xl font-display font-bold flex items-center gap-3">
-                         <User className="text-onukpa-orange" /> Passenger Info
+                         <User className="text-onukpa-orange" /> Passenger & Payment
                       </h3>
                       
                       <div className="space-y-6">
                         <div className="space-y-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
+                          <label htmlFor="name" className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
                           <div className="relative">
                             <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input 
+                              id="name"
                               className="w-full bg-slate-50 border-2 border-slate-100 py-4 pl-14 pr-6 rounded-2xl focus:outline-none focus:border-onukpa-orange focus:ring-4 focus:ring-onukpa-orange/5 transition-all font-bold text-onukpa-blue-dark" 
                               placeholder="e.g. Ama Owusu" 
                               value={form.name} 
@@ -306,10 +337,11 @@ export const BookRide: React.FC = () => {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Phone Number (WhatsApp)</label>
+                          <label htmlFor="phone" className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Phone Number (For SMS)</label>
                           <div className="relative">
                             <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input 
+                              id="phone"
                               className="w-full bg-slate-50 border-2 border-slate-100 py-4 pl-14 pr-6 rounded-2xl focus:outline-none focus:border-onukpa-orange focus:ring-4 focus:ring-onukpa-orange/5 transition-all font-bold text-onukpa-blue-dark" 
                               placeholder="e.g. 055 123 4567" 
                               value={form.phone} 
@@ -317,7 +349,45 @@ export const BookRide: React.FC = () => {
                               required
                             />
                           </div>
-                          <p className="text-xs text-slate-400 italic">We'll send your booking summary and tracking link to this number.</p>
+                          <p className="text-xs text-slate-400 italic">We'll send your ticket and tracking link via SMS immediately.</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Payment Method</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {[
+                            { value:'momo',   label:'MTN Mobile Money',     icon:'📱' },
+                            { value:'telecel',label:'Telecel Cash',          icon:'💵' },
+                            { value:'airtel', label:'AirtelTigo Money',      icon:'⚡' },
+                            { value:'onsite', label:'Pay at Station',        icon:'📍' },
+                          ].map(opt => (
+                            <label 
+                              key={opt.value} 
+                              className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all cursor-pointer ${
+                                form.payment === opt.value 
+                                  ? "bg-onukpa-blue/5 border-onukpa-blue ring-4 ring-onukpa-blue/5" 
+                                  : "bg-white border-slate-100 hover:border-slate-200"
+                              }`}
+                            >
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl ${
+                                 form.payment === opt.value ? "bg-onukpa-blue text-white" : "bg-slate-50 text-slate-400"
+                              }`}>
+                                 {opt.icon}
+                              </div>
+                              <div className="flex-1">
+                                 <p className="font-bold text-onukpa-blue-dark">{opt.label}</p>
+                              </div>
+                              <input 
+                                type="radio" 
+                                className="w-5 h-5 accent-onukpa-blue" 
+                                name="payment" 
+                                value={opt.value} 
+                                checked={form.payment === opt.value} 
+                                onChange={() => setForm({...form, payment: opt.value})}
+                              />
+                            </label>
+                          ))}
                         </div>
                       </div>
 
@@ -326,64 +396,6 @@ export const BookRide: React.FC = () => {
                            Back
                         </Button>
                         <Button type="submit" variant="primary" size="lg" disabled={!form.name || !form.phone}>
-                           Continue to payment
-                        </Button>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {step === 3 && (
-                    <motion.div 
-                      key="step1"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      className="space-y-8"
-                    >
-                      <h3 className="text-2xl font-display font-bold flex items-center gap-3">
-                         <CreditCard className="text-onukpa-orange" /> Payment Method
-                      </h3>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[
-                          { value:'momo',   label:'MTN Mobile Money',     icon:'📱' },
-                          { value:'telecel',label:'Telecel Cash',          icon:'💵' },
-                          { value:'airtel', label:'AirtelTigo Money',      icon:'⚡' },
-                          { value:'onsite', label:'Pay at Station',        icon:'📍' },
-                        ].map(opt => (
-                          <label 
-                            key={opt.value} 
-                            className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all cursor-pointer ${
-                              form.payment === opt.value 
-                                ? "bg-onukpa-blue/5 border-onukpa-blue ring-4 ring-onukpa-blue/5" 
-                                : "bg-white border-slate-100 hover:border-slate-200"
-                            }`}
-                          >
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl ${
-                               form.payment === opt.value ? "bg-onukpa-blue text-white" : "bg-slate-50 text-slate-400"
-                            }`}>
-                               {opt.icon}
-                            </div>
-                            <div className="flex-1">
-                               <p className="font-bold text-onukpa-blue-dark">{opt.label}</p>
-                            </div>
-                            <input 
-                              type="radio" 
-                              className="w-5 h-5 accent-onukpa-blue" 
-                              name="payment" 
-                              value={opt.value} 
-                              checked={form.payment === opt.value} 
-                              onChange={() => setForm({...form, payment: opt.value})}
-                            />
-                          </label>
-                        ))}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 pt-6">
-                        <Button type="button" variant="outline" size="lg" onClick={() => setStep(2)}>
-                           Back
-                        </Button>
-                        <Button type="submit" variant="primary" size="lg">
                            Finalize booking
                         </Button>
                       </div>

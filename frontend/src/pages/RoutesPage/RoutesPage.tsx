@@ -3,6 +3,9 @@ import { useRouteStore } from '@/store/route.store';
 import { RouteGrid } from '@/components/routes/RouteGrid/RouteGrid';
 import { Search, MapPin, Compass } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Modal } from '@/components/common/Modal/Modal';
+import { NetworkMap } from '@/components/routes/NetworkMap/NetworkMap';
+import { SuggestRouteForm } from '@/components/routes/SuggestRouteForm/SuggestRouteForm';
 
 const FILTERS = ['All Routes', 'Accra', 'Kumasi', 'Cape Coast', 'Tamale', 'Takoradi'];
 
@@ -10,6 +13,8 @@ export const RoutesPage: React.FC = () => {
   const { routes, isLoading, fetchRoutes } = useRouteStore();
   const [activeFilter, setActiveFilter] = useState('All Routes');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [isSuggestOpen, setIsSuggestOpen] = useState(false);
 
   useEffect(() => {
     fetchRoutes();
@@ -138,14 +143,20 @@ export const RoutesPage: React.FC = () => {
                     We're constantly working to connect more students with safer, better travel options. 
                     Suggest a new route to your university and we'll prioritize it in our expansion.
                  </p>
-                 <div className="flex flex-wrap gap-4 pt-4">
-                    <button className="bg-onukpa-blue text-white px-10 py-4 rounded-2xl font-bold shadow-xl shadow-onukpa-blue/20 hover:bg-onukpa-blue-dark active:scale-95 transition-all">
+                  <div className="flex flex-wrap gap-4 pt-4">
+                    <button 
+                      onClick={() => setIsSuggestOpen(true)}
+                      className="bg-onukpa-blue text-white px-10 py-4 rounded-2xl font-bold shadow-xl shadow-onukpa-blue/20 hover:bg-onukpa-blue-dark active:scale-95 transition-all"
+                    >
                        Suggest a Route
                     </button>
-                    <button className="bg-slate-50 text-slate-600 px-10 py-4 rounded-2xl font-bold hover:bg-slate-100 active:scale-95 transition-all">
+                    <button 
+                      onClick={() => setIsMapOpen(true)}
+                      className="bg-slate-50 text-slate-600 px-10 py-4 rounded-2xl font-bold hover:bg-slate-100 active:scale-95 transition-all"
+                    >
                        View Map
                     </button>
-                 </div>
+                  </div>
               </div>
 
               <div className="relative">
@@ -165,6 +176,31 @@ export const RoutesPage: React.FC = () => {
            </div>
         </div>
       </section>
+
+      {/* Interactive Modals */}
+      <Modal 
+        isOpen={isMapOpen} 
+        onClose={() => setIsMapOpen(false)}
+        title="Interactive Network Map"
+        size="xl"
+      >
+        <NetworkMap routes={routes} />
+      </Modal>
+
+      <Modal
+        isOpen={isSuggestOpen}
+        onClose={() => setIsSuggestOpen(false)}
+        title="Suggest a New Route"
+        size="lg"
+      >
+        <div className="py-4">
+          <p className="text-slate-500 mb-8 px-2">
+            Can't find your campus on our list? Tell us where you are and where you want to go. 
+            We use this data to prioritize our next fleet deployments.
+          </p>
+          <SuggestRouteForm />
+        </div>
+      </Modal>
     </div>
   );
 };

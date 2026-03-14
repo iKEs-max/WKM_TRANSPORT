@@ -44,6 +44,35 @@ export const TrackRide: React.FC = () => {
       setIsLoading(false);
     }
   };
+  
+  const trackUserLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setIsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        
+        // Construct deep link for maps
+        const url = isIOS 
+          ? `http://maps.apple.com/?q=${latitude},${longitude}`
+          : `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+        
+        window.open(url, '_blank');
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        alert("Could not get your location. Please ensure location services are enabled.");
+        setIsLoading(false);
+      },
+      { enableHighAccuracy: true }
+    );
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50">
@@ -206,7 +235,16 @@ export const TrackRide: React.FC = () => {
                      <div className="relative z-10">
                         <Bus className="mb-4 opacity-50" size={32} />
                         <h4 className="text-xl font-bold mb-2">Safe Travels!</h4>
-                        <p className="text-white/80 text-sm">Need help? WhatsApp us for direct support with your journey.</p>
+                        <p className="text-white/80 text-sm mb-6">Need help? WhatsApp us for direct support with your journey.</p>
+                        <Button 
+                          variant="glass" 
+                          size="sm" 
+                          onClick={trackUserLocation}
+                          className="w-full bg-white/20 hover:bg-white/30 border-white/30 text-white font-bold"
+                          isLoading={isLoading}
+                        >
+                          <MapPin size={16} className="mr-2" /> Track My Current Position
+                        </Button>
                      </div>
                      <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
                   </div>

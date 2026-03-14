@@ -11,8 +11,16 @@ import {
 } from 'lucide-react';
 import { ROUTES } from '@/config/routes';
 import { Logo } from '@/components/common/Logo/Logo';
-
+import { useSettingsStore } from '@/store/settings.store';
 export const Footer: React.FC = () => {
+  const { settings } = useSettingsStore();
+
+  const socialLinks = [
+    { Icon: Facebook, url: settings?.facebookUrl || '#' },
+    { Icon: Twitter, url: settings?.twitterUrl || '#' },
+    { Icon: Instagram, url: settings?.instagramUrl || '#' },
+  ];
+
   return (
     <footer className="bg-onukpa-blue-dark text-white pt-20 pb-8 mt-auto">
       <div className="container mx-auto px-4 md:px-6 max-w-7xl">
@@ -24,11 +32,14 @@ export const Footer: React.FC = () => {
               Making student transportation across Ghanaian universities reliable, comfortable, and affordable.
             </p>
             <div className="flex gap-4">
-              {[Facebook, Twitter, Instagram].map((Icon, i) => (
+              {socialLinks.map(({ Icon, url }, i) => (
                 <a 
                   key={i} 
-                  href="#" 
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-onukpa-orange hover:text-white transition-all border border-white/10"
+                  title="Social Link"
                 >
                   <Icon size={18} />
                 </a>
@@ -61,18 +72,18 @@ export const Footer: React.FC = () => {
           {/* Contact */}
           <div>
             <h4 className="font-display text-lg font-bold mb-8">Contact Us</h4>
-            <ul className="space-y-5">
+             <ul className="space-y-5">
               <li className="flex items-start gap-3 text-slate-400">
                 <MapPin size={20} className="text-onukpa-orange shrink-0 mt-1" />
                 <span>Legon Campus, UG<br />Accra, Ghana</span>
               </li>
               <li className="flex items-center gap-3 text-slate-400">
                 <Phone size={20} className="text-onukpa-orange shrink-0" />
-                <span>+233 55 123 4567</span>
+                <span>{settings?.contactPhone || '+233 55 123 4567'}</span>
               </li>
               <li className="flex items-center gap-3 text-slate-400">
                 <Mail size={20} className="text-onukpa-orange shrink-0" />
-                <span>hello@onukpaexpress.com</span>
+                <span>{settings?.contactEmail || 'hello@onukpaexpress.com'}</span>
               </li>
             </ul>
           </div>
@@ -80,7 +91,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom bar */}
         <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Onukpa Express Ride. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {settings?.siteName || 'Onukpa Express Ride'}. All rights reserved.</p>
           <div className="flex flex-wrap items-center justify-center gap-6">
             <span className="flex items-center gap-2">Built for Ghanaian Students 🇬🇭</span>
             <a 

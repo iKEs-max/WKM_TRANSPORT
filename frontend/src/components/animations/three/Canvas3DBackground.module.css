@@ -49,27 +49,6 @@
   to   { transform: translateY(-40px) scale(1.08); }
 }
 
-/* Animated bus SVG */
-.busSvg {
-  position: absolute;
-  width: 360px;
-  height: auto;
-  bottom: 80px;
-  right: 6%;
-  opacity: 0.88;
-  animation: busFloat 6s ease-in-out infinite alternate, busSlideIn 1.2s ease-out forwards;
-  filter: drop-shadow(0 12px 32px rgba(245,158,11,0.35));
-}
-
-@keyframes busFloat {
-  from { transform: translateY(0);  }
-  to   { transform: translateY(-18px); }
-}
-
-@keyframes busSlideIn {
-  from { opacity: 0; transform: translateX(80px); }
-  to   { opacity: 0.88; transform: translateX(0); }
-}
 
 /* Road animation */
 .road {
@@ -102,12 +81,6 @@
 }
 
 @media (max-width: 768px) {
-  .busSvg {
-    width: 220px;
-    bottom: 40px;
-    right: 2%;
-    opacity: 0.6;
-  }
   .orb1 { width: 280px; height: 280px; }
   .orb2 { width: 200px; height: 200px; }
   .orb3 { display: none; }

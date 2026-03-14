@@ -1,77 +1,51 @@
 import { Request, Response } from 'express';
 import httpStatus from 'http-status-codes';
 import prisma from '../../config/database';
-import { generateTicketNumber } from '../../utils/generateTicket';
-import { sendSMS } from '../../services/sms.service';
+import { bookingService } from './booking.service';
 
 export const createBooking = async (req: Request, res: Response) => {
-  const { routeId, numberOfTickets } = req.body;
-  const userId = (req.user as any).id; // user guaranteed by auth middleware
+  try {
+    const { routeId, numberOfTickets, selectedTime } = req.body;
+    const user = req.user as { id: string };
+    const userId = user.id;
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  const route = await prisma.route.findUnique({ where: { id: routeId } });
-  
-  if (!route || route.status !== 'ACTIVE') {
-    return res.status(httpStatus.NOT_FOUND).json({ message: 'Route not found or inactive' });
-  }
-
-  if (route.availableSeats < numberOfTickets) {
-    return res.status(httpStatus.BAD_REQUEST).json({ message: 'Not enough seats available' });
-  }
-
-  // Create booking and decrease available seats atomically
-  const result = await prisma.$transaction(async (tx) => {
-    const booking = await tx.booking.create({
-      data: {
-        userId,
-        routeId,
-        numberOfTickets,
-        totalAmount: Number(route.price) * numberOfTickets,
-        ticketNumber: generateTicketNumber(),
-        status: 'PENDING',
-      },
+    const result = await bookingService.createBooking({
+      userId,
+      routeId,
+      numberOfTickets,
+      selectedTime,
     });
 
-    await tx.route.update({
-      where: { id: routeId },
-      data: { availableSeats: { decrement: numberOfTickets } },
+    res.status(httpStatus.CREATED).send({
+      success: true,
+      data: result,
     });
-
-    return booking;
-  });
-
-  // Dispatch Confirmation SMS if user has a phone number
-  if (user?.phone) {
-    const msg = `Onukpa Express Ride\nTicket: ${result.ticketNumber}\nFrom: ${route.departure} To: ${route.destination}\nPass: ${numberOfTickets}x\nWe've received your booking and it is Pending.`;
-    // We don't await this to avoid blocking the HTTP response
-    sendSMS(user.phone, msg).catch(err => console.error("SMS failed", err));
+  } catch (error: any) {
+    res.status(httpStatus.BAD_REQUEST).json({ message: error.message });
   }
-
-  res.status(httpStatus.CREATED).send({
-    success: true,
-    data: result
-  });
 };
 
 export const getUserBookings = async (req: Request, res: Response) => {
+  const user = req.user as { id: string };
   const bookings = await prisma.booking.findMany({
-    where: { userId: (req.user as any).id },
+    where: { userId: user.id },
     include: { route: true, payment: true },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
   });
   res.send({
     success: true,
-    data: bookings
+    data: bookings,
   });
 };
 
 export const getBooking = async (req: Request, res: Response) => {
+  const user = req.user as { id: string };
   const booking = await prisma.booking.findFirst({
-    where: { 
+    where: {
       id: req.params.bookingId,
-      userId: (req.user as any).id // Only allow users to see their own
+      userId: user.id,
     },
-    include: { route: true, payment: true }
+    include: { route: true, payment: true },
   });
 
   if (!booking) {
@@ -79,13 +53,14 @@ export const getBooking = async (req: Request, res: Response) => {
   }
   res.send({
     success: true,
-    data: booking
+    data: booking,
   });
 };
 
 export const cancelBooking = async (req: Request, res: Response) => {
+  const user = req.user as { id: string };
   const booking = await prisma.booking.findFirst({
-    where: { id: req.params.bookingId, userId: (req.user as any).id }
+    where: { id: req.params.bookingId, userId: user.id },
   });
 
   if (!booking || booking.status === 'CANCELLED') {
@@ -95,63 +70,30 @@ export const cancelBooking = async (req: Request, res: Response) => {
   const result = await prisma.$transaction(async (tx) => {
     const cancelled = await tx.booking.update({
       where: { id: booking.id },
-      data: { status: 'CANCELLED' }
+      data: { status: 'CANCELLED' },
     });
 
     await tx.route.update({
       where: { id: booking.routeId },
-      data: { availableSeats: { increment: booking.numberOfTickets } }
+      data: { availableSeats: { increment: booking.numberOfTickets } },
     });
     return cancelled;
   });
 
   res.send({
     success: true,
-    data: result
+    data: result,
   });
 };
 
 export const trackBooking = async (req: Request, res: Response) => {
-  const { ticketCode } = req.params;
-  const booking = await prisma.booking.findFirst({
-    where: { ticketNumber: ticketCode },
-    include: { route: true },
-  });
-
-  if (!booking) {
-    return res.status(httpStatus.NOT_FOUND).json({ success: false, message: 'Ticket not found' });
+  try {
+    const { ticketCode } = req.params;
+    const result = await bookingService.trackBooking(ticketCode);
+    res.send({ success: true, ...result });
+  } catch (error: any) {
+    res.status(httpStatus.NOT_FOUND).json({ success: false, message: error.message });
   }
-
-  // Simulated real-time status logic
-  const now = new Date();
-  const travelDate = new Date(booking.createdAt); // Using createdAt as travelDate for demo if not present
-  let status = 'Scheduled';
-  let eta = 'N/A';
-
-  // Basic ETA calculation
-  const departure = new Date(travelDate);
-  // Assuming a static departure for simulation
-  departure.setHours(10, 0, 0); 
-
-  if (now > departure) {
-    status = 'In Transit';
-    const hoursSinceDeparture = (now.getTime() - departure.getTime()) / (1000 * 60 * 60);
-    if (hoursSinceDeparture > 5) status = 'Arrived';
-    else eta = '2-3 hours';
-  }
-
-  res.send({ 
-    success: true, 
-    status, 
-    eta,
-    booking: {
-      ticket_code: booking.ticketNumber,
-      origin: booking.route.departure,
-      destination: booking.route.destination,
-      departure_time: "10:00 AM", // Placeholder since departure_time isn't on the model
-      travel_date: travelDate
-    }
-  });
 };
 
 export const updateBookingStatus = async (req: Request, res: Response) => {
@@ -162,24 +104,21 @@ export const updateBookingStatus = async (req: Request, res: Response) => {
     include: { route: true, user: true }
   });
 
-  // Dispatch Status Update SMS
-  if (booking.user?.phone) {
-    let msg = '';
-    if (status === 'CONFIRMED') {
-      msg = `Onukpa Express Ride\nYour booking ${booking.ticketNumber} to ${booking.route.destination} is now CONFIRMED.`;
-    } else if (status === 'COMPLETED') {
-      msg = `Onukpa Express Ride\nYour trip to ${booking.route.destination} is complete. Thanks for riding with us!`;
-    } else if (status === 'CANCELLED') {
-      msg = `Onukpa Express Ride\nBooking ${booking.ticketNumber} has been CANCELLED.`;
-    }
-
-    if (msg) {
-      sendSMS(booking.user.phone, msg).catch(err => console.error("SMS failed", err));
-    }
-  }
-
+  // SMS notifications could be moved to service too, leaving here for now for simplicity
   res.send({
     success: true,
     data: booking
   });
+};
+
+export const createConciergeBooking = async (req: Request, res: Response) => {
+  try {
+    const result = await bookingService.createConciergeBooking(req.body);
+    res.status(httpStatus.CREATED).send({
+      success: true,
+      data: result
+    });
+  } catch (error: any) {
+    res.status(httpStatus.BAD_REQUEST).json({ message: error.message });
+  }
 };

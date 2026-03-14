@@ -7,6 +7,7 @@ import { Logo } from '@/components/common/Logo/Logo';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/common/Button/Button';
 import { ThemeSwitcher } from '@/components/common/ThemeSwitcher/ThemeSwitcher';
+import { useSettingsStore } from '@/store/settings.store';
 
 const NAV_LINKS = [
   { name: 'Home',   path: ROUTES.HOME      },
@@ -18,6 +19,7 @@ export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { isAuthenticated, logout, user } = useAuthStore();
+  const { settings } = useSettingsStore();
   const location = useLocation();
 
   useEffect(() => {
@@ -41,8 +43,11 @@ export const Header: React.FC = () => {
       >
         <div className={`container mx-auto px-6 flex items-center justify-between ${isScrolled ? 'max-w-none' : 'max-w-7xl'}`}>
           {/* Logo */}
-          <Link to={ROUTES.HOME} className="transition-transform active:scale-95 flex-shrink-0">
+          <Link to={ROUTES.HOME} className="transition-transform active:scale-95 flex-shrink-0 flex items-center gap-3">
             <Logo size={isScrolled ? 24 : 28} />
+            <span className={`font-display font-bold tracking-tight ${isScrolled ? 'text-lg text-slate-900' : 'text-xl text-onukpa-blue-dark'}`}>
+              {settings?.siteName || 'Onukpa Express'}
+            </span>
           </Link>
 
           {/* Desktop Nav */}

@@ -2,10 +2,10 @@ import { Request, Response } from 'express';
 import httpStatus from 'http-status-codes';
 import crypto from 'crypto';
 import prisma from '../../config/database';
-import { FakeHubtelProvider } from './providers/hubtel.provider';
+import { HubtelProvider } from './providers/hubtel.provider';
 
 const providers = {
-  hubtel: new FakeHubtelProvider(),
+  hubtel: new HubtelProvider(),
   // easy to add stripe, paystack etc later
 };
 

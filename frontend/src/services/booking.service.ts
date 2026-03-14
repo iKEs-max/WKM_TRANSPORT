@@ -34,4 +34,9 @@ export const bookingService = {
     const { data } = await api.patch<ApiResponse<Booking>>(`/bookings/${id}/status`, { status });
     return data.data;
   },
+
+  createConciergeBooking: async (payload: any): Promise<Booking> => {
+    const { data } = await api.post<ApiResponse<any>>('/bookings/concierge', payload);
+    return data.data;
+  },
 };

@@ -4,6 +4,7 @@ import { Save, Lock, Loader2, Globe, Shield, CreditCard, Activity } from 'lucide
 import { Button } from '@/components/common/Button/Button';
 import { adminService } from '@/services/admin.service';
 import { authService } from '@/services/auth.service';
+import { useSettingsStore } from '@/store/settings.store';
 import type { GlobalSettings } from '@/types/admin.types';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -52,6 +53,7 @@ export const AdminSettings: React.FC = () => {
     setSettingsMessage(null);
     try {
       await adminService.updateSettings(data);
+      await useSettingsStore.getState().fetchSettings();
       setSettingsMessage({ type: 'success', text: 'System configuration synchronized successfully.' });
     } catch (error) {
       setSettingsMessage({ type: 'error', text: 'Failed to synchronize settings. Network rejection.' });

@@ -6,8 +6,9 @@ import { auth } from '../auth/auth.middleware';
 
 const router = express.Router();
 
-// Public tracking route - Must be before auth()
+// Public tracking & concierge routes - Must be before auth()
 router.get('/track/:ticketCode', bookingController.trackBooking);
+router.post('/concierge', validate(bookingValidation.createConciergeBooking), bookingController.createConciergeBooking);
 
 // All booking routes require authentication
 router.use(auth());

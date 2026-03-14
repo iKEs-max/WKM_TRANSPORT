@@ -198,11 +198,6 @@ export const AdminBookings: React.FC = () => {
                   ) : (
                     filtered.map((b, i) => {
                        const isExpanded = expandedBookingId === (b.id ?? i.toString());
-                       const statusStyle = 
-                         b.status === 'CONFIRMED' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' :
-                         b.status === 'PENDING'   ? 'text-onukpa-orange bg-onukpa-orange/10 border-onukpa-orange/20' :
-                         b.status === 'CANCELLED' ? 'text-rose-400 bg-rose-500/10 border-rose-500/20' : 
-                         'text-onukpa-blue bg-onukpa-blue/10 border-onukpa-blue/20';
 
                        return (
                          <React.Fragment key={b.id ?? i}>
@@ -239,26 +234,30 @@ export const AdminBookings: React.FC = () => {
                                <td className="py-7">
                                   <span className="text-sm font-bold text-emerald-400">{formatCurrency(b.total_amount ?? b.totalAmount ?? 0)}</span>
                                </td>
-                               <td className="py-7">
-                                  <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border ${statusStyle}`}>
-                                     {b.status}
-                                  </span>
-                               </td>
                                <td className="py-7 pr-10 text-right">
                                   <div className="flex items-center justify-end gap-2">
                                      {b.status === 'PENDING' && (
                                        <button 
                                          onClick={(e) => handleUpdateStatus(b.id, 'CONFIRMED', e)}
-                                         className="w-9 h-9 flex items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all shadow-lg shadow-emerald-500/0 hover:shadow-emerald-500/20"
+                                         className="w-9 h-9 flex items-center justify-center rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all shadow-lg shadow-emerald-500/0 hover:shadow-emerald-500/20"
                                          title="Confirm Booking"
                                        >
                                           <CheckCircle size={16} />
                                        </button>
                                      )}
+                                     {b.status === 'CONFIRMED' && (
+                                       <button 
+                                         onClick={(e) => handleUpdateStatus(b.id, 'COMPLETED', e)}
+                                         className="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500 hover:text-white transition-all"
+                                         title="Mark Completed"
+                                       >
+                                          <CheckSquare size={16} />
+                                       </button>
+                                     )}
                                      <button 
                                        onClick={(e) => handleEdit(b, e)}
                                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-white/20 transition-all"
-                                       title="Edit Booking"
+                                       title="Detailed Sync/Edit"
                                      >
                                          <Edit2 size={16} />
                                      </button>
@@ -285,12 +284,12 @@ export const AdminBookings: React.FC = () => {
                                                       <Mail size={14} className="text-onukpa-orange" />
                                                       <span className="text-xs font-medium">{b.email || b.passenger_email || 'No email provided'}</span>
                                                    </div>
-                                                   <div className="flex items-center gap-3 text-slate-300">
-                                                      <User size={14} className="text-onukpa-blue" />
-                                                      <span className="text-xs font-medium">{b.phone || 'No direct comms linked'}</span>
-                                                   </div>
-                                                </div>
-                                             </div>
+                                                    <div className="flex items-center gap-3 text-slate-300">
+                                                       <User size={14} className="text-onukpa-blue" />
+                                                       <span className="text-xs font-medium">{b.phone || b.passenger_phone || 'No direct comms linked'}</span>
+                                                    </div>
+                                                 </div>
+                                              </div>
                                              <div className="space-y-4 px-10 border-x border-white/5">
                                                 <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Temporal Stamp</h5>
                                                 <div className="space-y-1">

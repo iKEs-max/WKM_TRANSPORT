@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import { ROUTES } from '@/config/routes';
 import { MainLayout, DashboardLayout } from '@/components/layout/MainLayout';
 import { useAuthStore } from '@/store/auth.store';
+import { useSettingsStore } from '@/store/settings.store';
 import { Loader } from '@/components/common/Loader/Loader';
 import { ToastContainer } from '@/components/common/Toast/Toast';
 
@@ -98,14 +99,20 @@ const AnimatedRoutes = () => {
   );
 };
 
-export const AppRouter: React.FC = () => (
-  <BrowserRouter>
-    <Suspense fallback={<Loader fullScreen />}>
-      <AnimatedRoutes />
-    </Suspense>
-    <ToastContainer />
-  </BrowserRouter>
-);
+export const AppRouter: React.FC = () => {
+  React.useEffect(() => {
+    useSettingsStore.getState().fetchSettings();
+  }, []);
+
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<Loader fullScreen />}>
+        <AnimatedRoutes />
+      </Suspense>
+      <ToastContainer />
+    </BrowserRouter>
+  );
+};
 
 // Root error boundary to surface JS errors instead of blank screen
 interface RootErrorState { error: Error | null; }

@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   DollarSign, Map, CalendarCheck, RefreshCw,
-  TrendingUp, Bus, Activity, Zap, ClipboardList, MapPin
+  TrendingUp, Bus, Activity, ClipboardList, MapPin
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { useAdminStore } from '@/store/admin.store';
@@ -79,16 +79,27 @@ const BarChart: React.FC<{ data: { date: string; count: number }[] }> = ({ data 
 
 /* ── Main component ───────────────────────────────────────────────────────*/
 export const AdminDashboard: React.FC = () => {
-  const { stats, liveStats, isLoading, fetchDashboardStats } = useAdminStore();
+  const { stats, liveStats, allRoutes, isLoading, fetchDashboardStats, fetchAllRoutes } = useAdminStore();
 
-  useEffect(() => { fetchDashboardStats(); }, [fetchDashboardStats]);
+  useEffect(() => { 
+    fetchDashboardStats();
+    fetchAllRoutes();
+  }, [fetchDashboardStats, fetchAllRoutes]);
 
   useEffect(() => {
-    const id = setInterval(fetchDashboardStats, 30_000);
+    const id = setInterval(() => {
+      fetchDashboardStats();
+      fetchAllRoutes();
+    }, 30_000);
     return () => clearInterval(id);
-  }, [fetchDashboardStats]);
+  }, [fetchDashboardStats, fetchAllRoutes]);
 
-  const handleRefresh = useCallback(() => { fetchDashboardStats(); }, [fetchDashboardStats]);
+  const handleRefresh = useCallback(() => { 
+    fetchDashboardStats();
+    fetchAllRoutes();
+  }, [fetchDashboardStats, fetchAllRoutes]);
+
+  const roadTimePause = allRoutes.filter(r => r.status === 'INACTIVE').length;
 
   const kpis = [
     {
@@ -104,8 +115,8 @@ export const AdminDashboard: React.FC = () => {
       icon: <Map size={28} />, accent: 'text-onukpa-blue', glow: 'bg-onukpa-blue/20'
     },
     {
-      label: 'Real-time Pulse', value: (liveStats?.confirmedBookings ?? 0) + ' Confirmed',
-      icon: <Zap size={28} />, accent: 'text-amber-400', glow: 'bg-amber-400/20'
+      label: 'Road Time Pause', value: roadTimePause,
+      icon: <Activity size={28} />, accent: 'text-rose-400', glow: 'bg-rose-500/20'
     },
   ];
 

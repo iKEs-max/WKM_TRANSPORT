@@ -18,7 +18,7 @@ export const generateToken = (
 };
 
 export const generateAuthTokens = async (user: { id: string, role: string }): Promise<AuthTokens> => {
-  const accessTokenExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+  const accessTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
   const refreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
   const accessToken = generateToken(user.id, user.role, accessTokenExpires, 'access');

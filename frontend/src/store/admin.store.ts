@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { routeService } from '@/services/route.service';
 import { bookingService } from '@/services/booking.service';
+import { useRouteStore } from '@/store/route.store';
 import type { Route, CreateRoutePayload, UpdateRoutePayload } from '@/types/route.types';
 
 interface DashboardChartPoint { date: string; count: number; revenue: number; }
@@ -117,6 +118,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     try {
       const newRoute = await routeService.createRoute(payload);
       set((state) => ({ allRoutes: [newRoute, ...state.allRoutes] }));
+      useRouteStore.getState().fetchRoutes();
     } catch (error: any) {
       set({ error: error.message || 'Failed to create route' });
       throw error;
@@ -129,6 +131,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       set((state) => ({
         allRoutes: state.allRoutes.map((r) => (String(r.id) === String(id) ? { ...r, ...updated } : r)),
       }));
+      useRouteStore.getState().fetchRoutes();
     } catch (error: any) {
       set({ error: error.message || 'Failed to update route' });
       throw error;
@@ -143,6 +146,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
           String(r.id) === String(id) ? { ...r, status } : r
         ),
       }));
+      useRouteStore.getState().fetchRoutes();
     } catch (error: any) {
       set({ error: error.message || 'Failed to update route status' });
       throw error;
@@ -159,6 +163,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
             : r
         ),
       }));
+      useRouteStore.getState().fetchRoutes();
     } catch (error: any) {
       set({ error: error.message || 'Failed to update seats' });
       throw error;
@@ -169,6 +174,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     try {
       await routeService.deleteRoute(id);
       set((state) => ({ allRoutes: state.allRoutes.filter((r) => String(r.id) !== String(id)) }));
+      useRouteStore.getState().fetchRoutes();
     } catch (error: any) {
       set({ error: error.message || 'Failed to delete route' });
       throw error;
