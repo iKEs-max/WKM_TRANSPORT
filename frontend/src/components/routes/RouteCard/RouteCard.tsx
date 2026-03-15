@@ -9,24 +9,14 @@ interface RouteCardProps {
   route: Route;
 }
 
-const getCampusImage = (destination: string) => {
-  const dest = destination.toLowerCase();
-  if (dest.includes('legon') || dest.includes('ug')) {
-    return '/images/authentic/legon_campus_elite.png';
-  }
-  if (dest.includes('knust') || dest.includes('kumasi')) {
-    return '/images/authentic/knust_campus_elite.png';
-  }
-  if (dest.includes('ucc') || dest.includes('cape coast')) {
-    return '/images/authentic/ucc_campus_elite.png';
-  }
-  return '/images/authentic/hero_students.png'; // Fallback to hero students
+const getCampusImage = () => {
+  return '/images/authentic/travel_route_cover.png';
 };
 
 export const RouteCard: React.FC<RouteCardProps> = ({ route }) => {
   const navigate = useNavigate();
   const isAvailable = route.availableSeats > 0;
-  const campusImg = getCampusImage(route.destination);
+  const campusImg = getCampusImage();
 
   const handleBook = (e: React.MouseEvent) => {
     e.stopPropagation();
