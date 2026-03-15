@@ -42,7 +42,7 @@ interface AdminState {
   deleteRoute: (id: string) => Promise<void>;
 }
 
-export const useAdminStore = create<AdminState>((set, get) => ({
+export const useAdminStore = create<AdminState>((set) => ({
   stats: null,
   liveStats: null,
   allBookings: [],
@@ -74,14 +74,15 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   fetchAllBookings: async (_filters) => {
     set({ isLoading: true, error: null });
     try {
-      // Fetch from routes/admin/stats for now (which includes recentBookings)
-      const liveStats = get().liveStats;
-      if (liveStats?.recentBookings) {
-        set({ allBookings: liveStats.recentBookings as any, isLoading: false });
-      } else {
-        const stats = await routeService.getDashboardStats();
-        set({ allBookings: stats.recentBookings, liveStats: stats, isLoading: false });
-      }
+      const response = await bookingService.getBookings();
+      const bookings = response.data || [];
+      // Map route data so origin/destination work in the ledger
+      const mappedBookings = bookings.map((b: any) => ({
+        ...b,
+        origin: b.route?.departure,
+        destination: b.route?.destination
+      }));
+      set({ allBookings: mappedBookings as any, isLoading: false });
     } catch (error: any) {
       set({ error: error.message || 'Failed to fetch bookings', isLoading: false });
     }

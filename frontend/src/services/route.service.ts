@@ -137,21 +137,66 @@ export const routeService = {
   },
 
   getDashboardStats: async () => {
-    // This previously called a complex backend aggregator.
-    // For now, let's provide basic counts from Supabase.
+    // Fetch real metrics from Supabase
     const { count: totalRoutes } = await supabase.from('routes').select('*', { count: 'exact', head: true });
     const { count: activeRoutes } = await supabase.from('routes').select('*', { count: 'exact', head: true }).eq('status', 'ACTIVE');
     
+    // Fetch all bookings for stats and recent list
+    const { data: allBookings, error: bookingsError } = await supabase
+      .from('bookings')
+      .select('*, route:routeId(departure, destination)')
+      .order('createdAt', { ascending: false });
+
+    if (bookingsError) {
+      console.error('Error fetching bookings for stats:', bookingsError);
+    }
+
+    const bookings = allBookings || [];
+    
+    const totalBookings = bookings.length;
+    const confirmedBookings = bookings.filter(b => b.status === 'CONFIRMED').length;
+    const pendingBookings = bookings.filter(b => b.status === 'PENDING').length;
+    const totalRevenue = bookings.reduce((sum, b) => sum + (parseFloat(b.totalAmount) || 0), 0);
+    
+    // Generate 7-day chart data
+    const chartData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const count = bookings.filter(b => b.createdAt?.startsWith(dateStr)).length;
+      chartData.push({ date: dateStr, count, revenue: 0 });
+    }
+
+    // Map top 10 most recent bookings
+    const recentBookings = bookings.slice(0, 10).map(b => ({
+      ...b,
+      origin: b.route?.departure,
+      destination: b.route?.destination
+    }));
+
+    // Fetch routes for routesFill (Inventory Health)
+    const { data: routesData } = await supabase.from('routes').select('*');
+    const routesFill = (routesData || []).map(r => ({
+      id: r.id,
+      origin: r.departure, // Map departure to origin for AdminDashboard
+      destination: r.destination,
+      total_seats: r.totalSeats,
+      available_seats: r.availableSeats,
+      status: r.status,
+      base_price: r.price
+    }));
+
     return {
       totalRoutes: totalRoutes || 0,
       activeRoutes: activeRoutes || 0,
-      totalBookings: 0,
-      totalRevenue: 0,
-      confirmedBookings: 0,
-      pendingBookings: 0,
-      chartData: [],
-      recentBookings: [],
-      routesFill: [],
+      totalBookings,
+      totalRevenue,
+      confirmedBookings,
+      pendingBookings,
+      chartData,
+      recentBookings,
+      routesFill,
     };
   },
 };

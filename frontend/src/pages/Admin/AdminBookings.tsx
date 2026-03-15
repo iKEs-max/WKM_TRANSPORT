@@ -98,10 +98,10 @@ export const AdminBookings: React.FC = () => {
   const totalRevenue = filtered.reduce((sum, b) => sum + parseFloat(String(b.total_amount ?? b.totalAmount ?? 0)), 0);
 
   const kpis = [
-    { label: 'Registry Load', value: counts.ALL, icon: <Activity size={24} />, accent: 'text-slate-400' },
-    { label: 'Authorized', value: counts.CONFIRMED, icon: <CheckSquare size={24} />, accent: 'text-emerald-400' },
-    { label: 'Awaiting Sync', value: counts.PENDING, icon: <Clock size={24} />, accent: 'text-onukpa-orange' },
-    { label: 'Asset Flow', value: formatCurrency(totalRevenue), icon: <DollarSign size={24} />, accent: 'text-onukpa-blue' },
+    { label: 'Total Bookings', value: counts.ALL, icon: <Activity size={24} />, accent: 'text-slate-400' },
+    { label: 'Confirmed', value: counts.CONFIRMED, icon: <CheckSquare size={24} />, accent: 'text-emerald-400' },
+    { label: 'Pending', value: counts.PENDING, icon: <Clock size={24} />, accent: 'text-onukpa-orange' },
+    { label: 'Revenue', value: formatCurrency(totalRevenue), icon: <DollarSign size={24} />, accent: 'text-onukpa-blue' },
   ];
 
   return (
@@ -182,11 +182,11 @@ export const AdminBookings: React.FC = () => {
             <table className="w-full">
                <thead>
                   <tr className="text-left border-b border-white/5">
-                     <th className="py-8 pl-10 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Digital Reference</th>
-                     <th className="py-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Passenger Profile</th>
-                     <th className="py-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Fleet Trajectory</th>
-                     <th className="py-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Asset Value</th>
-                     <th className="py-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Hub Status</th>
+                     <th className="py-8 pl-10 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ticket ID</th>
+                     <th className="py-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Passenger</th>
+                     <th className="py-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Route</th>
+                     <th className="py-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Amount</th>
+                     <th className="py-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
                      <th className="py-8 pr-10 text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest">Actions</th>
                   </tr>
                </thead>
@@ -278,7 +278,7 @@ export const AdminBookings: React.FC = () => {
                                        <div className="p-10 border-b border-white/5 space-y-8">
                                           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                                              <div className="space-y-4">
-                                                <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Contact Node</h5>
+                                                <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Contact Info</h5>
                                                 <div className="space-y-3">
                                                    <div className="flex items-center gap-3 text-slate-300">
                                                       <Mail size={14} className="text-onukpa-orange" />
@@ -291,17 +291,17 @@ export const AdminBookings: React.FC = () => {
                                                  </div>
                                               </div>
                                              <div className="space-y-4 px-10 border-x border-white/5">
-                                                <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Temporal Stamp</h5>
+                                                <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Booking Date</h5>
                                                 <div className="space-y-1">
                                                    <span className="block text-lg font-bold text-white">{formatDate(b.created_at ?? b.createdAt)}</span>
                                                    <span className="block text-[10px] font-medium text-slate-500">TRANSACTION INDEX: #{b.id}</span>
                                                 </div>
                                              </div>
                                              <div className="space-y-4">
-                                                <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Network Command</h5>
+                                                <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Actions</h5>
                                                 <div className="flex gap-3">
-                                                   <Button variant="outline" size="sm" className="rounded-xl border-white/10 text-xs py-3" onClick={() => alert('Printing Secure Ticket...')}>Generate Ticket</Button>
-                                                   <Button variant="glass" size="sm" className="rounded-xl text-xs py-3" onClick={() => alert('Opening Logistics map...')}>Track Asset</Button>
+                                                   <Button variant="outline" size="sm" className="rounded-xl border-white/10 text-xs py-3" onClick={() => console.log('Print ticket action pending')}>Print Ticket</Button>
+                                                   <Button variant="glass" size="sm" className="rounded-xl text-xs py-3" onClick={() => console.log('Track map action pending')}>Track Ride</Button>
                                                 </div>
                                              </div>
                                           </div>

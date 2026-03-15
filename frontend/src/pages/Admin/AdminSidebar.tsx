@@ -20,7 +20,7 @@ export const AdminSidebar: React.FC = () => {
   const { isSidebarOpen, setSidebarOpen } = useUIStore();
 
   const navItems = [
-    { label: 'Overview', icon: LayoutDashboard, path: ROUTES.ADMIN_DASHBOARD, end: true },
+    { label: 'Dashboard', icon: LayoutDashboard, path: ROUTES.ADMIN_DASHBOARD, end: true },
     { label: 'Routes', icon: Route, path: ROUTES.ADMIN_ROUTES },
     { label: 'Bookings', icon: ClipboardList, path: ROUTES.ADMIN_BOOKINGS },
     { label: 'Settings', icon: Settings, path: ROUTES.ADMIN_SETTINGS },

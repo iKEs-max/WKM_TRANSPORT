@@ -547,13 +547,13 @@ export const AdminRoutes: React.FC = () => {
                         
                         <div className="space-y-2 min-w-[160px]">
                            <div className="flex justify-between items-end">
-                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{avail}/{total} Seats</span>
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{avail} of {total} Available</span>
                               <span className={`text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 rounded-full border ${cls}`}>{label}</span>
                            </div>
                            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/10">
                               <div 
-                                className={`h-full ${avail > 10 ? 'bg-emerald-500' : avail > 0 ? 'bg-onukpa-orange' : 'bg-slate-600'}`}
-                                style={{ width: `${(avail/total)*100}%` }}
+                                className={`h-full ${avail === 0 ? 'bg-rose-500' : avail <= 10 ? 'bg-onukpa-orange' : 'bg-emerald-500'}`}
+                                style={{ width: `${((total - avail) / total) * 100}%` }}
                               />
                            </div>
                         </div>

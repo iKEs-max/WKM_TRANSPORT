@@ -115,7 +115,7 @@ export const AdminDashboard: React.FC = () => {
       icon: <Map size={28} />, accent: 'text-onukpa-blue', glow: 'bg-onukpa-blue/20'
     },
     {
-      label: 'Road Time Pause', value: roadTimePause,
+      label: 'Inactive Routes', value: roadTimePause,
       icon: <Activity size={28} />, accent: 'text-rose-400', glow: 'bg-rose-500/20'
     },
   ];
@@ -269,11 +269,11 @@ export const AdminDashboard: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="text-left border-b border-white/10">
-                <th className="pb-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] pl-2">Vessel / Route</th>
-                <th className="pb-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Capacity</th>
-                <th className="pb-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-8">Fill Density</th>
-                <th className="pb-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Urgency</th>
-                <th className="pb-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] text-right pr-2">Status</th>
+                <th className="pb-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] pl-2">Route</th>
+                <th className="pb-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Seats (Avail/Total)</th>
+                <th className="pb-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-8">Occupancy</th>
+                <th className="pb-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Status</th>
+                <th className="pb-6 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] text-right pr-2">Active State</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">

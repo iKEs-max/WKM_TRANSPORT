@@ -209,11 +209,10 @@ export const AdminSettings: React.FC = () => {
 
                        <div className="flex items-center pt-8">
                           <label className="flex items-center gap-4 cursor-pointer group">
-                             <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all group-hover:bg-white/5`}>
-                                <input type="checkbox" className="hidden" {...register('enableEmailNotifications')} />
-                                <div className="w-3 h-3 rounded-sm bg-onukpa-orange opacity-0 check-indicator transition-opacity" style={{ opacity: 'var(--indicator-opacity, 0)' }}></div>
+                             <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all group-hover:bg-white/5 border-white/20`}>
+                                <input type="checkbox" className="hidden peer" {...register('enableEmailNotifications')} />
+                                <div className="w-3 h-3 rounded-sm bg-onukpa-orange opacity-0 peer-checked:opacity-100 transition-opacity"></div>
                              </div>
-                             <style dangerouslySetInnerHTML={{ __html: `input:checked + .check-indicator { --indicator-opacity: 1 !important; }` }} />
                              <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Enable Real-time Email Sync</span>
                           </label>
                        </div>
@@ -276,6 +275,7 @@ export const AdminSettings: React.FC = () => {
                             className="w-full bg-white/5 border border-white/10 pl-14 pr-6 py-4 rounded-2xl text-white font-bold focus:outline-none focus:border-onukpa-orange transition-all" 
                             {...registerPassword('newPassword', { required: true, minLength: 6 })} 
                             placeholder="••••••••"
+                            autoComplete="new-password"
                           />
                        </div>
                     </div>
@@ -289,6 +289,7 @@ export const AdminSettings: React.FC = () => {
                             className="w-full bg-white/5 border border-white/10 pl-14 pr-6 py-4 rounded-2xl text-white font-bold focus:outline-none focus:border-onukpa-orange transition-all" 
                             {...registerPassword('confirmPassword', { required: true })} 
                             placeholder="••••••••"
+                            autoComplete="new-password"
                           />
                        </div>
                     </div>
