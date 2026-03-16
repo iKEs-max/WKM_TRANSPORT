@@ -95,7 +95,7 @@ export const Footer: React.FC = () => {
           <div className="flex flex-wrap items-center justify-center gap-6">
             <span className="flex items-center gap-2">Built for Ghanaian Students 🇬🇭</span>
             <a 
-              href="https://devjik.com" 
+              href="https://dev-jik.vercel.app/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-onukpa-orange font-bold text-xs flex items-center gap-2 hover:bg-white/10 hover:scale-105 transition-all shadow-glow-sm"
